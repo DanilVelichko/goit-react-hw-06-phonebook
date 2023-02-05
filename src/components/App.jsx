@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Form from './Form/Form';
 import Filter from './Filter/Filter';
 import ContactsList from './ContactsList/ContactsList';
-import useLocalStorage from '../hooks/useLocalStorage';
+import { addFilter } from 'redux/filter/sliceFilter';
+import { add, remove } from 'redux/contacts/sliceContacts';
+import { useSelector, useDispatch } from 'react-redux';
 
 const App = () => {
-  const [contacts, setContacts] = useLocalStorage('contacts', []);
-  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
 
   const formSubmitHandler = data => {
-        
     const matchNameInput = contacts.find(
       contact => contact.name.toLowerCase() === data.name.toLowerCase()
     );
@@ -17,16 +19,15 @@ const App = () => {
     if (matchNameInput) {
       alert(data.name + ' is already in contacts.');
     } else {
-      setContacts(prev => [...prev, data]);
+      dispatch(add(data));
     }
   };
 
-  const handleDataUpdate = (input) => {
-    setFilter(input.currentTarget.value);
+  const handleDataUpdate = input => {
+    dispatch(addFilter(input.currentTarget.value));
   };
 
   const filterContacts = () => {
-  
     if (filter !== '') {
       return contacts.filter(contact =>
         contact.name.toLowerCase().includes(filter.toLowerCase().trim())
@@ -37,7 +38,7 @@ const App = () => {
   };
 
   const onDeleteBtn = id => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
+    dispatch(remove(id));
   };
 
   return (
